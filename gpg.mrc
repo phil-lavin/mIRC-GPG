@@ -78,34 +78,27 @@ alias gpgDecrypt {
 
   .timergpg $+ . $+ $3 $+ . $+ $2 off
 
-  echo -a ----DECRYPTED MESSAGE FROM $1 IN $2 ON $3 $+ ----
-
-  set %gpg.i 1
-
-  while (%gpg.i <= $lines($4- $+ .unenc)) {
-    set %gpg.readline $read($4- $+ .unenc, %gpg.i)
-    if ($len(%gpg.readline) > 0) {
-      echo -a %gpg.readline
-    }
-    else {
-      echo -a $chr(1)
-    }
-    inc %gpg.i
+  if (!$isfile(%gpg.destfile)) {
+    echo -a Error detected. GPG didn't decrypt - This message may not have been for you
   }
-  echo -a ----END MESSAGE-----
+  else {
+    echo -a ----DECRYPTED MESSAGE FROM $1 IN $2 ON $3 $+ ----
 
-  runapphidden cmd /c del " $+ $4- $+ *" /Q
-
-  if ($lines($4- $+ .out) == 0) {
     set %gpg.i 1
 
-    while (%gpg.i <= $lines($4- $+ .out)) {
-      echo -a $read($4- $+ .out, %gpg.i)
+    while (%gpg.i <= $lines($4- $+ .unenc)) {
+      set %gpg.readline $read($4- $+ .unenc, %gpg.i)
+      if ($len(%gpg.readline) > 0) {
+        echo -a %gpg.readline
+      }
+      else {
+        echo -a $chr(1)
+      }
       inc %gpg.i
     }
+    echo -a ----END MESSAGE-----
 
     runapphidden cmd /c del " $+ $4- $+ *" /Q
-    .timergpg $+ . $+ $3 $+ . $+ $2 off
   }
 }
 
