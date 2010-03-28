@@ -228,6 +228,9 @@ on 1:TEXT:*:#:{
       if ($1- != ~) {
         write " $+ $scriptdir $+ gpg\textin\ $+ $network $+ - $+ $nick $+ .txt.gpg $+ " $1-
       }
+      elseif ($pos($1-,!,0) > 0) {
+        write " $+ $scriptdir $+ gpg\textin\ $+ $network $+ - $+ $nick $+ .txt.gpg $+ " $replace($1-,!,$chr(13))
+      }
       else {
         write " $+ $scriptdir $+ gpg\textin\ $+ $network $+ - $+ $nick $+ .txt.gpg $+ " $chr(13)
       }
