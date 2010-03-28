@@ -1,6 +1,15 @@
 ; mirc-gpg by Phil Lavin (0x3FFC291A) & Allan Jude (0x7F697DBA)
 ; SVN: $Id$
 
+menu channel {
+  mIRC-GPG
+  .Generate a new Key:runapp cmd /c %gpg.path $+ gpg.exe --gen-key
+  ;.Upload my Keys:runapp cmd /c %gpg.path $+ gpg.exe --keyserver pgp.mit.edu --send-keys ; doesn't work yet
+  .Refresh my Keys:runapp cmd /c %gpg.path $+ gpg.exe --keyserver pgp.mit.edu --refresh-keys
+  .Search for Keys:runapp cmd /c %gpg.path $+ gpg.exe --keyserver pgp.mit.edu --search-keys $$?="Search Parameters (Email is best)"
+  ;.Set Key Trust: ;not implemented
+}
+
 on *:load:{
   set %gpg.scriptver 0.1
   set %gpg.path $$?="Enter the path to GPG with trailing slash $+ $chr(13) $+ e.g. D:\GNU\GnuPG\ $+ $chr(13) $+ If you have GPG correctly setup in your Path variable (recommended) you can leave this setting blank."
