@@ -68,14 +68,14 @@ alias gpgEncrypt {
     if (%gpg.line == -----END PGP MESSAGE-----) {
       msg $active %gpg.outmsg
       unset %gpg.outmsg
-      unset %gpg.body 0
+      unset %gpg.body
     }
 
     if (%gpg.body == 1) {
       if ($len(%gpg.outmsg) >= 385) {
         msg $active %gpg.outmsg
         unset %gpg.outmsg
-        set %gpg.outmsg $gpg.line
+        set %gpg.outmsg %gpg.line
       } 
       elseif ($len(%gpg.outmsg) == 0) {
         set %gpg.outmsg %gpg.line
@@ -191,7 +191,7 @@ alias dodel {
     .timergpg $+ . $+ $1 $+ . $+ $2 off
   }
   dec %gpg.incount 1
-  if ($gpg.incount <= 0) {
+  if (%gpg.incount <= 0) {
     disable #gpg.capture
   }
 }
@@ -201,7 +201,7 @@ on 1:TEXT:-----BEGIN PGP MESSAGE-----:#:{
   set -u10 %gpg.textin. [ $+ [ $network $+ .  [ $+ [ $nick ] ] ] ] 1
   write -c " $+ $scriptdir $+ gpg\textin\ $+ $network $+ - $+ $nick $+ .txt.gpg $+ " $1-
   .timergpg $+ . $+ $network $+ . $+ $nick 0 1 dodel $network $nick
-  if ($gpg.incount < 0) {
+  if (%gpg.incount < 0) {
     set %gpg.incount 0
   }
   inc %gpg.incount 1
@@ -226,7 +226,7 @@ on 1:TEXT:*:#:{
     if (%gpg.textin. [ $+ [ $network $+ .  [ $+ [ $nick ] ] ] ] != $null) {
       set -u10 %gpg.textin. [ $+ [ $network $+ .  [ $+ [ $nick ] ] ] ] 1
       if ($pos($1-,!,0) > 0) {
-        write " $+ $scriptdir $+ gpg\textin\ $+ $network $+ - $+ $nick $+ .txt.gpg $+ " $replace($replace($1-,~!,$chr(13) $+ $chr(10)),!,$chr(10))
+        write " $+ $scriptdir $+ gpg\textin\ $+ $network $+ - $+ $nick $+ .txt.gpg $+ " $replace($replace($1-,~!,$chr(10)),!,$chr(10))
       }
       elseif ($1- != ~) {
         write " $+ $scriptdir $+ gpg\textin\ $+ $network $+ - $+ $nick $+ .txt.gpg $+ " $1-
