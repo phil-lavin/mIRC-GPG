@@ -11,7 +11,7 @@ menu channel {
 }
 
 on *:load:{
-  set %gpg.scriptver 0.1
+  set %gpg.scriptver 0.2
   set %gpg.path $$?="Enter the path to GPG with trailing slash $+ $chr(13) $+ e.g. D:\GNU\GnuPG\ $+ $chr(13) $+ If you have GPG correctly setup in your Path variable (recommended) you can leave this setting blank."
 }
 
