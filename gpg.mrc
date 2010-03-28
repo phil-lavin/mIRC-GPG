@@ -278,7 +278,7 @@ alias rev {
       dec %gpg.a
     }
   }
-  var %gpg.o %gpg.b
+  set %gpg.o %gpg.b
   unset %gpg.a
   unset %gpg.b
   unset %gpg.c
