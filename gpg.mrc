@@ -110,24 +110,24 @@ alias gpgDecrypt {
   .timergpg $+ . $+ $3 $+ . $+ $2 off
 
   if (!$isfile(%gpg.destfile)) {
-    echo -a Error detected. GPG didn't decrypt - This message may not have been for you
+    echo $2 Error detected in encrypted message from $1 $+ . This message may not have been for you
   }
   else {
-    echo -a ----DECRYPTED MESSAGE FROM $1 IN $2 ON $3 $+ ----
+    echo $2 ----DECRYPTED MESSAGE FROM $1 $+ ----
 
     set %gpg.i 1
 
     while (%gpg.i <= $lines($4- $+ .unenc)) {
       set %gpg.readline $read($4- $+ .unenc, %gpg.i)
       if ($len(%gpg.readline) > 0) {
-        echo -a %gpg.readline
+        echo $2 %gpg.readline
       }
       else {
-        echo -a $chr(1)
+        echo $2 $chr(1)
       }
       inc %gpg.i
     }
-    echo -a ----END MESSAGE-----
+    echo $2 ----END MESSAGE-----
 
     runapphidden cmd /c del " $+ $4- $+ *" /Q
   }
@@ -209,8 +209,7 @@ alias dodel {
   }
 }
 
-#gpg on
-on 1:TEXT:-----BEGIN PGP MESSAGE-----:#:{
+on 1:TEXT:-----BEGIN PGP MESSAGE-----:*:{
   enable #gpg.capture
   set -u10 %gpg.textin. [ $+ [ $network $+ .  [ $+ [ $nick ] ] ] ] 1
   write -c " $+ $scriptdir $+ gpg\textin\ $+ $network $+ - $+ $nick $+ .txt.gpg $+ " $1-
@@ -221,7 +220,7 @@ on 1:TEXT:-----BEGIN PGP MESSAGE-----:#:{
   inc %gpg.incount 1
 }
 
-on 1:TEXT:-----END PGP MESSAGE-----:#:{
+on 1:TEXT:-----END PGP MESSAGE-----:*:{
   if (%gpg.textin. [ $+ [ $network $+ .  [ $+ [ $nick ] ] ] ] != $null) {
     .timergpg $+ . $+ $network $+ . $+ $nick off
     unset %gpg.textin. [ $+ [ $network $+ .  [ $+ [ $nick ] ] ] ]
@@ -231,12 +230,19 @@ on 1:TEXT:-----END PGP MESSAGE-----:#:{
   if (%gpg.incount <= 0) {
     disable #gpg.capture
   }
-  gpgdecrypt $nick $chan $network $scriptdir $+ gpg\textin\ $+ $network $+ - $+ $nick $+ .txt.gpg
+
+  if ($chan != $null) {
+    set %gpg.src $chan
+  }
+  else {
+    set %gpg.src $nick
+  }
+
+  gpgdecrypt $nick %gpg.src $network $scriptdir $+ gpg\textin\ $+ $network $+ - $+ $nick $+ .txt.gpg
 }
 
-#gpg end
 #gpg.capture off
-on 1:TEXT:*:#:{
+on 1:TEXT:*:*:{
   if ($1 != -----END PGP MESSAGE-----) {
     if (%gpg.textin. [ $+ [ $network $+ .  [ $+ [ $nick ] ] ] ] != $null) {
       set -u10 %gpg.textin. [ $+ [ $network $+ .  [ $+ [ $nick ] ] ] ] 1
