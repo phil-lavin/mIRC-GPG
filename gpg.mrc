@@ -62,7 +62,7 @@ alias gpgEncrypt {
 
     if ($len(%gpg.line) == 0) {
       set %gpg.line ~
-      msg $active Comment: GeekShed GPG for IRC by: Phil & Allan %gpg.scriptver http://mirc-gpg.googlecode.com
+      msg $active Comment: mirc-gpg by GeekShed.net version %gpg.scriptver http://mirc-gpg.googlecode.com
     }
 
     msg $active %gpg.line
@@ -194,7 +194,7 @@ on 1:TEXT:-----END PGP MESSAGE-----:#:{
     write " $+ $scriptdir $+ gpg\textin\ $+ $network $+ - $+ $nick $+ .txt.gpg $+ " $1-
   }
   dec %gpg.incount 1
-  if ($gpg.incount <= 0) {
+  if (%gpg.incount <= 0) {
     disable #gpg.capture
   }
   gpgdecrypt $nick $chan $network $scriptdir $+ gpg\textin\ $+ $network $+ - $+ $nick $+ .txt.gpg
