@@ -158,12 +158,11 @@ on *:dialog:spk:init:*:{
   addKeysToSPK
 }
 
-on *:dialog:spk:sclick:3:{
-  set %gpg.halt 1
-}
-
-on *:dialog:spk:close:*:{
-  if (%gpg.halt == $null && $did(1, 0).sel == 0) {
+on *:dialog:spk:sclick:*:{
+  if ($did == 3) {
+    set %gpg.halt 1
+  }
+  elseif ($did(1, 0).sel == 0) {
     echo -a No key was selected
     set %gpg.halt 1
   }
