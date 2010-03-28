@@ -34,67 +34,71 @@ alias f8 {
 alias gpgEncrypt {
   $dialog(spk, selPubKey)
 
-  set %gpg.sourcefile $scriptdir $+ gpg\source.txt
-  set %gpg.destfile $scriptdir $+ gpg\dest.gpg
-  set %gpg.outfile $scriptdir $+ gpg\out.txt
+  if (%gpg.halt == $null) {
+    set %gpg.sourcefile $scriptdir $+ gpg\source.txt
+    set %gpg.destfile $scriptdir $+ gpg\dest.gpg
+    set %gpg.outfile $scriptdir $+ gpg\out.txt
 
-  write -c " $+ %gpg.sourcefile $+ " $editbox($active, 0)
+    write -c " $+ %gpg.sourcefile $+ " $editbox($active, 0)
 
-  runapp cmd /c %gpg.path $+ gpg.exe -e -a %gpg.recipients -o " $+ %gpg.destfile $+ " " $+ %gpg.sourcefile $+ " > " $+ %gpg.outfile $+ " 2>&1
+    runapp cmd /c %gpg.path $+ gpg.exe -e -a %gpg.recipients -o " $+ %gpg.destfile $+ " " $+ %gpg.sourcefile $+ " > " $+ %gpg.outfile $+ " 2>&1
 
-  if ($lines(%gpg.outfile) > 0) {
-    echo -a Possible error detected. GPG produced output:
+    if ($lines(%gpg.outfile) > 0) {
+      echo -a Possible error detected. GPG produced output:
+
+      set %gpg.i 1
+
+      while (%gpg.i <= $lines(%gpg.outfile)) {
+        echo -a $read(%gpg.outfile, %gpg.i)
+        inc %gpg.i
+      }
+    }
+
+    editbox -a $null
 
     set %gpg.i 1
 
-    while (%gpg.i <= $lines(%gpg.outfile)) {
-      echo -a $read(%gpg.outfile, %gpg.i)
-      inc %gpg.i
-    }
-  }
+    while (%gpg.i <= $lines(%gpg.destfile)) {
+      set %gpg.line $read(%gpg.destfile, %gpg.i)
 
-  editbox -a $null
-
-  set %gpg.i 1
-
-  while (%gpg.i <= $lines(%gpg.destfile)) {
-    set %gpg.line $read(%gpg.destfile, %gpg.i)
-
-    if ($len(%gpg.line) == 0) {
-      set %gpg.line ~
-      msg $active Comment: mirc-gpg by GeekShed.net version %gpg.scriptver http://mirc-gpg.googlecode.com
-      set %gpg.body 1
-    }
-    if (%gpg.line == -----END PGP MESSAGE-----) {
-      msg $active %gpg.outmsg
-      unset %gpg.outmsg
-      unset %gpg.body
-    }
-
-    if (%gpg.body == 1) {
-      if ($len(%gpg.outmsg) >= 385) {
+      if ($len(%gpg.line) == 0) {
+        set %gpg.line ~
+        msg $active Comment: mirc-gpg by GeekShed.net version %gpg.scriptver http://mirc-gpg.googlecode.com
+        set %gpg.body 1
+      }
+      if (%gpg.line == -----END PGP MESSAGE-----) {
         msg $active %gpg.outmsg
         unset %gpg.outmsg
-        set %gpg.outmsg %gpg.line
+        unset %gpg.body
+      }
+
+      if (%gpg.body == 1) {
+        if ($len(%gpg.outmsg) >= 385) {
+          msg $active %gpg.outmsg
+          unset %gpg.outmsg
+          set %gpg.outmsg %gpg.line
+        } 
+        elseif ($len(%gpg.outmsg) == 0) {
+          set %gpg.outmsg %gpg.line
+        }
+        else {
+          set %gpg.outmsg %gpg.outmsg $+ ! $+ %gpg.line
+        }
       } 
-      elseif ($len(%gpg.outmsg) == 0) {
-        set %gpg.outmsg %gpg.line
-      }
       else {
-        set %gpg.outmsg %gpg.outmsg $+ ! $+ %gpg.line
+        msg $active %gpg.line
       }
-    } 
-    else {
-      msg $active %gpg.line
+      inc %gpg.i
     }
-    inc %gpg.i
+
+    if ($len(%gpg.outmsg) > 0) {
+      msg $active %gpg.outmsg
+      unset %gpg.outmsg
+    }
+    unset %gpg.body
   }
 
-  if ($len(%gpg.outmsg) > 0) {
-    msg $active %gpg.outmsg
-    unset %gpg.outmsg
-  }
-  unset %gpg.body
+  unset %gpg.halt
 
   runapphidden cmd /c del " $+ $scriptdir $+ gpg\*" /Q
 }
@@ -154,20 +158,32 @@ on *:dialog:spk:init:*:{
   addKeysToSPK
 }
 
+on *:dialog:spk:sclick:*:{
+  if ($did == 3) {
+    set %gpg.halt 1
+  }
+}
+
 on *:dialog:spk:close:*:{
-  set %gpg.i 1
-  set %gpg.recipients $null
+  if (%gpg.halt == $null && $did(1, 0).sel == 0) {
+    echo -a No key was selected
+    set %gpg.halt 1
+  }
+  else {
+    set %gpg.i 1
+    set %gpg.recipients $null
 
-  while (%gpg.i <= $did(1).lines) {
-    if ($did(1, %gpg.i).cstate == 1 || $did(1, %gpg.i).state == 1) {
-      set %gpg.revitem $rev($did(1, %gpg.i))
-      set %gpg.emailstart $pos(%gpg.revitem, >, 1)
-      set %gpg.emailend $pos(%gpg.revitem, <, 1)
+    while (%gpg.i <= $did(1).lines) {
+      if ($did(1, %gpg.i).cstate == 1 || $did(1, %gpg.i).state == 1) {
+        set %gpg.revitem $rev($did(1, %gpg.i))
+        set %gpg.emailstart $pos(%gpg.revitem, >, 1)
+        set %gpg.emailend $pos(%gpg.revitem, <, 1)
 
-      set %gpg.recipients %gpg.recipients -r $rev($mid(%gpg.revitem, $calc(%gpg.emailstart + 1), $calc(%gpg.emailend - %gpg.emailstart - 1)))
+        set %gpg.recipients %gpg.recipients -r $rev($mid(%gpg.revitem, $calc(%gpg.emailstart + 1), $calc(%gpg.emailend - %gpg.emailstart - 1)))
+      }
+
+      inc %gpg.i
     }
-
-    inc %gpg.i
   }
 }
 
@@ -181,8 +197,8 @@ dialog selPubKey {
 
   list 1, 10 10 230 100, multsel check result
 
-  button "OK", 2, 65 120 50 20, ok
-  button "Cancel", 3, 125 120 50 20, cancel
+  button "OK", 2, 65 120 50 20, ok %gpg.okbut
+  button "Cancel", 3, 125 120 50 20, cancel %gpg.cancelbut
 }
 
 alias dodel {
@@ -196,7 +212,6 @@ alias dodel {
   }
 }
 
-#gpg on
 on 1:TEXT:-----BEGIN PGP MESSAGE-----:#:{
   enable #gpg.capture
   set -u10 %gpg.textin. [ $+ [ $network $+ .  [ $+ [ $nick ] ] ] ] 1
@@ -221,7 +236,6 @@ on 1:TEXT:-----END PGP MESSAGE-----:#:{
   gpgdecrypt $nick $chan $network $scriptdir $+ gpg\textin\ $+ $network $+ - $+ $nick $+ .txt.gpg
 }
 
-#gpg end
 #gpg.capture off
 on 1:TEXT:*:#:{
   if ($1 != -----END PGP MESSAGE-----) {
