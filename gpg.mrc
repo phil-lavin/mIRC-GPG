@@ -139,7 +139,7 @@ on *:dialog:spk:close:*:{
   set %gpg.recipients $null
 
   while (%gpg.i <= $did(1).lines) {
-    if ($did(1, %gpg.i).cstate == 1) {
+    if ($did(1, %gpg.i).cstate == 1 || $did(1, %gpg.i).state == 1) {
       set %gpg.revitem $rev($did(1, %gpg.i))
       set %gpg.emailstart $pos(%gpg.revitem, >, 1)
       set %gpg.emailend $pos(%gpg.revitem, <, 1)
@@ -159,7 +159,7 @@ dialog selPubKey {
 
   option dbu
 
-  list 1, 10 10 230 100, check result
+  list 1, 10 10 230 100, multsel check result
 
   button "OK", 2, 65 120 50 20, ok
   button "Cancel", 3, 125 120 50 20, cancel
@@ -218,11 +218,16 @@ on 1:TEXT:*:#:{
 
 alias rev {
   if ($1) {
-    var %gpg.c $strip($1-),%gpg.a $len(%gpg.c)
+    set %gpg.c $strip($1-)
+    set %gpg.a $len(%gpg.c)
     while (%gpg.a >= 1) {
-      var %gpg.b %gpg.b $+ $replace($mid(%gpg.c,%gpg.a,1),$chr(32),$str($chr(32),2))
+      set %gpg.b %gpg.b $+ $replace($mid(%gpg.c,%gpg.a,1),$chr(32),$str($chr(32),2))
       dec %gpg.a
     }
   }
-  return %gpg.b
+  var %gpg.o %gpg.b
+  unset %gpg.a
+  unset %gpg.b
+  unset %gpg.c
+  return %gpg.o
 }
