@@ -1,8 +1,9 @@
 ; mirc-gpg by Phil Lavin (0x3FFC291A) & Allan Jude (0x7F697DBA)
 ; SVN: $Id: gpg.mrc 4 2010-03-28 17:58:17Z allan.jude $
+
 on *:load:{
   set %gpg.scriptver 0.1
-  set %gpg.path $$?="Enter the path to GPG"
+  set %gpg.path $$?="Enter the path to GPG with trailing slash $+ $chr(13) $+ e.g. D:\GNU\GnuPG\ $+ $chr(13) $+ If you have GPG correctly setup in your Path variable (recommended) you can leave this setting blank."
 }
 
 alias runAppHidden {
@@ -19,37 +20,11 @@ alias runApp {
   .comclose %gpg.runname $com(%gpg.runname, Run, 1, *bstr, $$1-, int, 3, bool, true)
 }
 
-alias runAppHiddenNoWait {
+alias runAppMin {
   set %gpg.runname rah $+ $rand(a,z) $+ $rand(a,z) $+ $rand(a,z) $+ $rand(a,z)
 
   .comopen %gpg.runname WScript.Shell
-  .comclose %gpg.runname $com(%gpg.runname, Run, 1, *bstr, $$1-, int, 0)
-}
-
-alias runAppMinNoWait {
-  set %gpg.runname rah $+ $rand(a,z) $+ $rand(a,z) $+ $rand(a,z) $+ $rand(a,z)
-
-  .comopen %gpg.runname WScript.Shell
-  .comclose %gpg.runname $com(%gpg.runname, Run, 1, *bstr, $$1-, int, 7)
-}
-
-alias runAppNoWait {
-  set %gpg.runname rah $+ $rand(a,z) $+ $rand(a,z) $+ $rand(a,z) $+ $rand(a,z)
-
-  .comopen %gpg.runname WScript.Shell
-  .comclose %gpg.runname $com(%gpg.runname, Run, 1, *bstr, $$1-, int, 3)
-}
-
-alias appactivate {
-  .comopen a WScript.Shell
-  .comclose a $com(a,AppActivate,3,*bstr,$$1-)
-}
-
-alias sendKeys {
-  set %gpg.runname rah $+ $rand(a,z) $+ $rand(a,z) $+ $rand(a,z) $+ $rand(a,z)
-
-  .comopen %gpg.runname WScript.Shell
-  .comclose %gpg.runname $com(%gpg.runname, SendKeys, 1, *bstr, $$1-)
+  .comclose %gpg.runname $com(%gpg.runname, Run, 1, *bstr, $$1-, int, 7, bool, true)
 }
 
 alias f8 {
@@ -99,22 +74,29 @@ alias gpgEncrypt {
 
 alias gpgDecrypt {
   set %gpg.destfile $4- $+ .unenc
-  runappminnowait cmd /c %gpg.path $+ gpg.exe -d -o " $+ %gpg.destfile $+ " " $+ $4- $+ " 2> " $+ $4- $+ .out $+ "
-  .timer 1 1 gpgDecrypt2 $1-
-}
+  runappmin cmd /c %gpg.path $+ gpg.exe -d -o " $+ %gpg.destfile $+ " " $+ $4- $+ " 2> " $+ $4- $+ .out $+ "
 
-alias gpgDecrypt2 {
-  if ($lines($4- $+ .out) == 0) {
-    .timergpg $+ . $+ $3 $+ . $+ $2 off
-    set %gpg.pass $?="Enter Private Key Password"
+  .timergpg $+ . $+ $3 $+ . $+ $2 off
 
-    appactivate cmd.exe
-    .timer 1 1 sendkeys %gpg.pass $+ $chr(13) $+ %gpg.pass $+ $chr(13) $+ %gpg.pass $+ $chr(13)
-    .timer 1 2 gpgDecrypt3 $1-
+  echo -a ----DECRYPTED MESSAGE FROM $1 IN $2 ON $3 $+ ----
+
+  set %gpg.i 1
+
+  while (%gpg.i <= $lines($4- $+ .unenc)) {
+    set %gpg.readline $read($4- $+ .unenc, %gpg.i)
+    if ($len(%gpg.readline) > 0) {
+      echo -a %gpg.readline
+    }
+    else {
+      echo -a $chr(1)
+    }
+    inc %gpg.i
   }
-  else {
-    echo -a Possible error detected. GPG produced output:
+  echo -a ----END MESSAGE-----
 
+  runapphidden cmd /c del " $+ $4- $+ *" /Q
+
+  if ($lines($4- $+ .out) == 0) {
     set %gpg.i 1
 
     while (%gpg.i <= $lines($4- $+ .out)) {
@@ -125,33 +107,6 @@ alias gpgDecrypt2 {
     runapphidden cmd /c del " $+ $4- $+ *" /Q
     .timergpg $+ . $+ $3 $+ . $+ $2 off
   }
-}
-
-alias gpgDecrypt3 {
-  set %gpg.temp $read($4- $+ .out, w, *bad passphrase*);
-
-  if ($readn != 0) {
-    echo -a 4Bad Passphrase!
-  }
-  else {
-    echo -a ----DECRYPTED MESSAGE FROM $1 IN $2 ON $3 $+ ----
-
-    set %gpg.i 1
-
-    while (%gpg.i <= $lines($4- $+ .unenc)) {
-      set %gpg.readline $read($4- $+ .unenc, %gpg.i)
-      if ($len(%gpg.readline) > 0) {
-        echo -a %gpg.readline
-      }
-      else {
-        echo -a $chr(1)
-      }
-      inc %gpg.i
-    }
-    echo -a ----END MESSAGE-----
-  }
-
-  runapphidden cmd /c del " $+ $4- $+ *" /Q
 }
 
 alias addKeysToSPK {
