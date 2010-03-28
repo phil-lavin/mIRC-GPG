@@ -225,11 +225,11 @@ on 1:TEXT:*:#:{
   if ($1 != -----END PGP MESSAGE-----) {
     if (%gpg.textin. [ $+ [ $network $+ .  [ $+ [ $nick ] ] ] ] != $null) {
       set -u10 %gpg.textin. [ $+ [ $network $+ .  [ $+ [ $nick ] ] ] ] 1
-      if ($1- != ~) {
-        write " $+ $scriptdir $+ gpg\textin\ $+ $network $+ - $+ $nick $+ .txt.gpg $+ " $1-
+      if ($pos($1-,!,0) > 0) {
+        write " $+ $scriptdir $+ gpg\textin\ $+ $network $+ - $+ $nick $+ .txt.gpg $+ " $replace($replace($1-,~!,$chr(13) $+ $chr(10)),!,$chr(10))
       }
-      elseif ($pos($1-,!,0) > 0) {
-        write " $+ $scriptdir $+ gpg\textin\ $+ $network $+ - $+ $nick $+ .txt.gpg $+ " $replace($1-,!,$chr(13))
+      elseif ($1- != ~) {
+        write " $+ $scriptdir $+ gpg\textin\ $+ $network $+ - $+ $nick $+ .txt.gpg $+ " $1-
       }
       else {
         write " $+ $scriptdir $+ gpg\textin\ $+ $network $+ - $+ $nick $+ .txt.gpg $+ " $chr(13)
