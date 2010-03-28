@@ -12,7 +12,7 @@ menu status,channel,query,nicklist,menubar {
 }
 
 on *:load:{
-  set %gpg.scriptver 0.2
+  set %gpg.scriptver 0.3
 
   if (!$isdir($scriptdir $+ gpg)) {
     runapphidden cmd /c mkdir " $+ $scriptdir $+ gpg $+ "
