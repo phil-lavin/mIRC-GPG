@@ -1,5 +1,5 @@
 ; mirc-gpg by Phil Lavin (0x3FFC291A) & Allan Jude (0x7F697DBA)
-; SVN: $Id: gpg.mrc 4 2010-03-28 17:58:17Z allan.jude $
+; SVN: $Id$
 
 on *:load:{
   set %gpg.scriptver 0.1
