@@ -204,7 +204,7 @@ dialog selPubKey {
 
   option dbu
 
-  list 1, 10 10 230 100, multisel check result
+  list 1, 10 10 230 100, check result
 
   button "OK", 2, 65 120 50 20, ok
   button "Cancel", 3, 125 120 50 20, cancel
