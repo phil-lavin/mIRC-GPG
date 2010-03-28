@@ -1,7 +1,8 @@
 ; mirc-gpg by Phil Lavin (0x3FFC291A) & Allan Jude (0x7F697DBA)
 ; SVN: $Id$
 
-menu channel {
+menu status,channel,query,nicklist,menubar {
+  -
   mIRC-GPG
   .Generate a new Key:runapp cmd /c %gpg.path $+ gpg.exe --gen-key
   ;.Upload my Keys:runapp cmd /c %gpg.path $+ gpg.exe --keyserver pgp.mit.edu --send-keys ; doesn't work yet
