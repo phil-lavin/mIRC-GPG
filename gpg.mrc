@@ -196,6 +196,7 @@ alias dodel {
   }
 }
 
+#gpg on
 on 1:TEXT:-----BEGIN PGP MESSAGE-----:#:{
   enable #gpg.capture
   set -u10 %gpg.textin. [ $+ [ $network $+ .  [ $+ [ $nick ] ] ] ] 1
@@ -220,6 +221,7 @@ on 1:TEXT:-----END PGP MESSAGE-----:#:{
   gpgdecrypt $nick $chan $network $scriptdir $+ gpg\textin\ $+ $network $+ - $+ $nick $+ .txt.gpg
 }
 
+#gpg end
 #gpg.capture off
 on 1:TEXT:*:#:{
   if ($1 != -----END PGP MESSAGE-----) {
