@@ -12,6 +12,14 @@ menu channel {
 
 on *:load:{
   set %gpg.scriptver 0.2
+
+  if (!$isdir($scriptdir $+ gpg)) {
+    runapphidden cmd /c mkdir " $+ $scriptdir $+ gpg $+ "
+  }
+  if (!$isdir($scriptdir $+ gpg\textin)) {
+    runapphidden cmd /c mkdir " $+ $scriptdir $+ gpg\textin $+ "
+  }
+
   set %gpg.path $$?="Enter the path to GPG with trailing slash $+ $chr(13) $+ e.g. D:\GNU\GnuPG\ $+ $chr(13) $+ If you have GPG correctly setup in your Path variable (recommended) you can leave this setting blank."
 }
 
