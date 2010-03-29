@@ -177,7 +177,7 @@ alias gpgDecrypt {
   .timergpg $+ . $+ $3 $+ . $+ $2 off
 
   if (!$isfile(%gpg.destfile)) {
-    echo $2 Error detected in encrypted message from $1 $+ . This message may not have been for you
+    echo $2 $timestamp < $+ $1 [ERROR]> 4This message may not have been for you
   }
   else {
     set %gpg.i 1
