@@ -5,6 +5,13 @@ alias gpg.setver {
   set %gpg.scriptver 0.6
 }
 
+alias gpg.updatever {
+  if ($file($script).mtime != %gpg.scriptmtime) {
+    set %gpg.scriptmtime $file($script).mtime
+    gpg.setver
+  }
+}
+
 menu status,channel,query,nicklist,menubar {
   -
   mIRC-GPG
@@ -50,6 +57,8 @@ on *:START:{
       env path $env(path) $+ ; $+ %gpg.path
     }
   }
+
+  .timergpgverupdate 0 60 gpg.updatever
 }
 
 alias runAppHidden {
