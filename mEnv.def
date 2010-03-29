@@ -1,0 +1,6 @@
+; dlltool --base-file C:\DOCUME~1\THEMEG~1.PHO\LOCALS~1\Temp/cca02928.base --output-exp mEnv.exp --dllname mEnv.dll --output-def libmEnv.def --no-export-all-symbols --add-stdcall-alias --exclude-symbol=DllMainCRTStartup@12 --def C:\DOCUME~1\THEMEG~1.PHO\LOCALS~1\Temp/cca02928.def --output-lib lidmEnv.a
+EXPORTS
+
+getEnv = _getEnv@24
+putEnv = _putEnv@24
+delEnv = _delEnv@24
