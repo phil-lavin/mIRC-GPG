@@ -58,7 +58,7 @@ alias runAppMin {
 
 alias env {
   if ($isid) {
-    var %x = $dll(menv.dll, getEnv, $1)
+    var %x = $dll($scriptdir $+ menv.dll, getEnv, $1)
     if ($gettok(%x, 1, 32) == OK) {
       if ($prop == exists) {
         return 1
@@ -73,7 +73,7 @@ alias env {
     }
   }
   else {
-    var %x = $dll(menv.dll, putEnv, $1 $+ = $+ $2-)
+    var %x = $dll($scriptdir $+ menv.dll, putEnv, $1 $+ = $+ $2-)
   }
 }
 
