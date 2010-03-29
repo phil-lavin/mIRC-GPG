@@ -37,11 +37,11 @@ on *:load:{
 
   if ($isfile(C:\Program Files\GNU\GnuPG\gpg.exe)) {
     set %gpg.path C:\Program Files\GNU\GnuPG\
-    echo -a GPG Found At C:\Program Files\GNU\GnuPG\
+    echo -at GPG Found At C:\Program Files\GNU\GnuPG\
   }
   elseif ($isfile(C:\Program Files (x86)\GNU\GnuPG\gpg.exe)) {
     set %gpg.path C:\Program Files (x86)\GNU\GnuPG\
-    echo -a GPG Found At C:\Program Files (x86)\GNU\GnuPG\
+    echo -at GPG Found At C:\Program Files (x86)\GNU\GnuPG\
   }
   else {
     set %gpg.path $$?="I can't find GPG! Enter the path to the directory in which gpg.exe resides:"
@@ -123,12 +123,12 @@ alias gpgEncrypt {
     runapp cmd /c gpg -e -a %gpg.recipients -o " $+ %gpg.destfile $+ " " $+ %gpg.sourcefile $+ " > " $+ %gpg.outfile $+ " 2>&1
 
     if ($lines(%gpg.outfile) > 0) {
-      echo -a Possible error detected. GPG produced output:
+      echo -at Possible error detected. GPG produced output:
 
       set %gpg.i 1
 
       while (%gpg.i <= $lines(%gpg.outfile)) {
-        echo -a $read(%gpg.outfile, %gpg.i)
+        echo -at $read(%gpg.outfile, %gpg.i)
         inc %gpg.i
       }
     }
