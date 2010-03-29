@@ -197,7 +197,12 @@ alias gpgDecrypt {
 alias addKeysToSPK {
   set %gpg.keyfile $scriptdir $+ gpg\keylist.txt
 
-  runapphidden cmd /c gpg --list-keys > " $+ %gpg.keyfile $+ "
+  if ($1 == $null) {
+    runapphidden cmd /c gpg --list-keys > " $+ %gpg.keyfile $+ "
+  }
+  else {
+    runapphidden cmd /c gpg --list-keys " $+ $1- $+ " > " $+ %gpg.keyfile $+ "
+  }
 
   ; Reset $readn - is there a better way?
   set %gpg.random $read(%gpg.keyfile, 1)
@@ -222,6 +227,10 @@ on *:dialog:spk:init:*:{
 on *:dialog:spk:sclick:*:{
   if ($did == 3) {
     set %gpg.halt 1
+  }
+  elseif ($did == 5) {
+    did -r spk 1
+    addkeystospk $did(4).text
   }
   elseif ($did(1, 0).sel == 0) {
     echo -a No key was selected
@@ -253,10 +262,13 @@ dialog selPubKey {
 
   option dbu
 
-  list 1, 10 10 230 100, multsel check result
+  edit "", 4, 10 10 190 10
+  button "Search", 5, 205 8 35 14, default
 
-  button "OK", 2, 65 120 50 20, ok %gpg.okbut
-  button "Cancel", 3, 125 120 50 20, cancel %gpg.cancelbut
+  list 1, 10 25 230 100, multsel check result
+
+  button "OK", 2, 65 127 50 20, ok %gpg.okbut
+  button "Cancel", 3, 125 127 50 20, cancel %gpg.cancelbut
 }
 
 alias dodel {
