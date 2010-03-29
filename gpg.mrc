@@ -16,9 +16,9 @@ menu status,channel,query,nicklist,menubar {
   -
   mIRC-GPG
   .Generate a new Key:runapp cmd /c gpg --gen-key
-  ;.Upload my Keys:runapp cmd /c gpg --keyserver pgp.mit.edu --send-keys ; doesn't work yet
-  .Refresh my Keys:runapp cmd /c gpg --keyserver pgp.mit.edu --refresh-keys
-  .Search for Keys:runapp cmd /c gpg --keyserver pgp.mit.edu --search-keys $$?="Search Parameters (Email is best)"
+  ;.Upload my Keys:runapp cmd /c gpg --keyserver gpg.geekshed.net --send-keys ; doesn't work yet
+  .Refresh my Keys:runapp cmd /c gpg --keyserver gpg.geekshed.net --refresh-keys
+  .Search for Keys:runapp cmd /c gpg --keyserver gpg.geekshed.net --search-keys $$?="Search Parameters (Email is best)"
   ;.Set Key Trust: ;not implemented
 }
 
