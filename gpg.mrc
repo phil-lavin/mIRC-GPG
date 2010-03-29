@@ -15,6 +15,8 @@ alias gpg.updatever {
 menu status,channel,query,nicklist,menubar {
   -
   mIRC-GPG
+  .Enable Automatic Decryption:.enable #gpg
+  .Disable Automatic Decryption:.disable #gpg
   .Generate a new Key:runapp cmd /c gpg --gen-key
   ;.Upload my Keys:runapp cmd /c gpg --keyserver gpg.geekshed.net --send-keys ; doesn't work yet
   .Refresh my Keys:runapp cmd /c gpg --keyserver gpg.geekshed.net --refresh-keys
@@ -303,6 +305,7 @@ alias dodel {
   }
 }
 
+#gpg
 on 1:TEXT:-----BEGIN PGP MESSAGE-----:*:{
   .enable #gpg.capture
   set -u10 %gpg.textin. [ $+ [ $network $+ .  [ $+ [ $nick ] ] ] ] 1
@@ -334,7 +337,7 @@ on 1:TEXT:-----END PGP MESSAGE-----:*:{
 
   gpgdecrypt $nick %gpg.src $network $scriptdir $+ gpg\textin\ $+ $network $+ - $+ $nick $+ .txt.gpg
 }
-
+#gpg
 #gpg.capture off
 on 1:TEXT:*:*:{
   if ($1 != -----END PGP MESSAGE-----) {
