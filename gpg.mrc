@@ -1,6 +1,10 @@
 ; mirc-gpg by Phil Lavin (0x3FFC291A) & Allan Jude (0x7F697DBA)
 ; SVN: $Id$
 
+alias gpg.setver {
+  set %gpg.scriptver 0.6
+}
+
 menu status,channel,query,nicklist,menubar {
   -
   mIRC-GPG
@@ -12,7 +16,7 @@ menu status,channel,query,nicklist,menubar {
 }
 
 on *:load:{
-  set %gpg.scriptver 0.6
+  gpg.setver
 
   if (!$isdir($scriptdir $+ gpg)) {
     runapphidden cmd /c mkdir " $+ $scriptdir $+ gpg $+ "
@@ -39,6 +43,8 @@ on *:load:{
 }
 
 on *:START:{
+  gpg.setver
+
   if (%gpg.path != $null) {
     if (; $+ %gpg.path !isin $env(path)) {
       env path $env(path) $+ ; $+ %gpg.path
@@ -174,21 +180,18 @@ alias gpgDecrypt {
     echo $2 Error detected in encrypted message from $1 $+ . This message may not have been for you
   }
   else {
-    echo $2 ----DECRYPTED MESSAGE FROM $1 $+ ----
-
     set %gpg.i 1
 
     while (%gpg.i <= $lines($4- $+ .unenc)) {
       set %gpg.readline $read($4- $+ .unenc, %gpg.i)
       if ($len(%gpg.readline) > 0) {
-        echo $2 %gpg.readline
+        echo $2 $timestamp < $+ $1 [UNENC]> 4 $+ $strip(%gpg.readline)
       }
       else {
-        echo $2 $chr(1)
+        echo $2 $timestamp < $+ $1 $+ [UNENC]> 4 $+ $chr(1)
       }
       inc %gpg.i
     }
-    echo $2 ----END MESSAGE-----
 
     runapphidden cmd /c del " $+ $4- $+ *" /Q
   }
