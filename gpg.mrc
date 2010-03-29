@@ -292,7 +292,7 @@ alias dodel {
 }
 
 on 1:TEXT:-----BEGIN PGP MESSAGE-----:*:{
-  enable #gpg.capture
+  .enable #gpg.capture
   set -u10 %gpg.textin. [ $+ [ $network $+ .  [ $+ [ $nick ] ] ] ] 1
   write -c " $+ $scriptdir $+ gpg\textin\ $+ $network $+ - $+ $nick $+ .txt.gpg $+ " $1-
   .timergpg $+ . $+ $network $+ . $+ $nick 0 1 dodel $network $nick
@@ -310,7 +310,7 @@ on 1:TEXT:-----END PGP MESSAGE-----:*:{
   }
   dec %gpg.incount 1
   if (%gpg.incount <= 0) {
-    disable #gpg.capture
+    .disable #gpg.capture
   }
 
   if ($chan != $null) {
