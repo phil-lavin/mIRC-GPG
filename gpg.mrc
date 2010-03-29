@@ -4,10 +4,10 @@
 menu status,channel,query,nicklist,menubar {
   -
   mIRC-GPG
-  .Generate a new Key:runapp cmd /c %gpg.path $+ gpg.exe --gen-key
-  ;.Upload my Keys:runapp cmd /c %gpg.path $+ gpg.exe --keyserver pgp.mit.edu --send-keys ; doesn't work yet
-  .Refresh my Keys:runapp cmd /c %gpg.path $+ gpg.exe --keyserver pgp.mit.edu --refresh-keys
-  .Search for Keys:runapp cmd /c %gpg.path $+ gpg.exe --keyserver pgp.mit.edu --search-keys $$?="Search Parameters (Email is best)"
+  .Generate a new Key:runapp cmd /c gpg --gen-key
+  ;.Upload my Keys:runapp cmd /c gpg --keyserver pgp.mit.edu --send-keys ; doesn't work yet
+  .Refresh my Keys:runapp cmd /c gpg --keyserver pgp.mit.edu --refresh-keys
+  .Search for Keys:runapp cmd /c gpg --keyserver pgp.mit.edu --search-keys $$?="Search Parameters (Email is best)"
   ;.Set Key Trust: ;not implemented
 }
 
@@ -21,7 +21,18 @@ on *:load:{
     runapphidden cmd /c mkdir " $+ $scriptdir $+ gpg\textin $+ "
   }
 
-  set %gpg.path $$?="Enter the path to GPG with trailing slash $+ $chr(13) $+ e.g. D:\GNU\GnuPG\ $+ $chr(13) $+ If you have GPG correctly setup in your Path variable (recommended) you can leave this setting blank."
+  set %gpg.path $$?="Enter the path to the directory in which gpg.exe resides"
+  if (; $+ %gpg.path !isin $env(path)) {
+    env path $env(path) $+ ; $+ %gpg.path
+  }
+}
+
+on *:START:{
+  if (%gpg.path != $null) {
+    if (; $+ %gpg.path !isin $env(path)) {
+      env path $env(path) $+ ; $+ %gpg.path
+    }
+  }
 }
 
 alias runAppHidden {
@@ -45,6 +56,27 @@ alias runAppMin {
   .comclose %gpg.runname $com(%gpg.runname, Run, 1, *bstr, $$1-, int, 7, bool, true)
 }
 
+alias env {
+  if ($isid) {
+    var %x = $dll(menv.dll, getEnv, $1)
+    if ($gettok(%x, 1, 32) == OK) {
+      if ($prop == exists) {
+        return 1
+      }
+      return $gettok(%x, 2-, 32)
+    }
+    else {
+      if ($prop == exists) {
+        return 0
+      }
+      return $null
+    }
+  }
+  else {
+    var %x = $dll(menv.dll, putEnv, $1 $+ = $+ $2-)
+  }
+}
+
 alias f8 {
   gpgEncrypt
 }
@@ -59,7 +91,7 @@ alias gpgEncrypt {
 
     write -c " $+ %gpg.sourcefile $+ " $editbox($active, 0)
 
-    runapp cmd /c %gpg.path $+ gpg.exe -e -a %gpg.recipients -o " $+ %gpg.destfile $+ " " $+ %gpg.sourcefile $+ " > " $+ %gpg.outfile $+ " 2>&1
+    runapp cmd /c gpg -e -a %gpg.recipients -o " $+ %gpg.destfile $+ " " $+ %gpg.sourcefile $+ " > " $+ %gpg.outfile $+ " 2>&1
 
     if ($lines(%gpg.outfile) > 0) {
       echo -a Possible error detected. GPG produced output:
@@ -123,7 +155,7 @@ alias gpgEncrypt {
 
 alias gpgDecrypt {
   set %gpg.destfile $4- $+ .unenc
-  runappmin cmd /c %gpg.path $+ gpg.exe -d -o " $+ %gpg.destfile $+ " " $+ $4- $+ " 2> " $+ $4- $+ .out $+ "
+  runappmin cmd /c gpg -d -o " $+ %gpg.destfile $+ " " $+ $4- $+ " 2> " $+ $4- $+ .out $+ "
 
   .timergpg $+ . $+ $3 $+ . $+ $2 off
 
