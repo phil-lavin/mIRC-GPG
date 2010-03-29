@@ -221,7 +221,13 @@ alias addKeysToSPK {
 }
 
 on *:dialog:spk:init:*:{
-  addKeysToSPK
+  if (%gpg.searchstr == $null) {
+    addKeysToSPK
+  }
+  else {
+    addKeysToSPK %gpg.searchstr
+    did -a spk 4 %gpg.searchstr
+  }
 }
 
 on *:dialog:spk:sclick:*:{
@@ -230,26 +236,29 @@ on *:dialog:spk:sclick:*:{
   }
   elseif ($did == 5) {
     did -r spk 1
-    addkeystospk $did(4).text
+    set %gpg.searchstr $did(4).text
+    addkeystospk %gpg.searchstr
   }
-  elseif ($did(1, 0).sel == 0) {
-    echo -a No key was selected
-    set %gpg.halt 1
-  }
-  else {
-    set %gpg.i 1
-    set %gpg.recipients $null
+  elseif ($did == 2) {
+    if ($did(1, 0).sel == 0) {
+      echo -a No key was selected
+      set %gpg.halt 1
+    }
+    else {
+      set %gpg.i 1
+      set %gpg.recipients $null
 
-    while (%gpg.i <= $did(1).lines) {
-      if ($did(1, %gpg.i).cstate == 1 || $did(1, %gpg.i).state == 1) {
-        set %gpg.revitem $rev($did(1, %gpg.i))
-        set %gpg.emailstart $pos(%gpg.revitem, >, 1)
-        set %gpg.emailend $pos(%gpg.revitem, <, 1)
+      while (%gpg.i <= $did(1).lines) {
+        if ($did(1, %gpg.i).cstate == 1 || $did(1, %gpg.i).state == 1) {
+          set %gpg.revitem $rev($did(1, %gpg.i))
+          set %gpg.emailstart $pos(%gpg.revitem, >, 1)
+          set %gpg.emailend $pos(%gpg.revitem, <, 1)
 
-        set %gpg.recipients %gpg.recipients -r $rev($mid(%gpg.revitem, $calc(%gpg.emailstart + 1), $calc(%gpg.emailend - %gpg.emailstart - 1)))
+          set %gpg.recipients %gpg.recipients -r $rev($mid(%gpg.revitem, $calc(%gpg.emailstart + 1), $calc(%gpg.emailend - %gpg.emailstart - 1)))
+        }
+
+        inc %gpg.i
       }
-
-      inc %gpg.i
     }
   }
 }
