@@ -20,7 +20,7 @@ menu status,channel,query,nicklist,menubar {
   ..$iif($group(#gpg).status == off,$style(1)) Disable:.disable #gpg
   .Generate a new Key:runapp cmd /c gpg --gen-key
   ;.Upload my Keys:runapp cmd /c gpg --keyserver gpg.geekshed.net --send-keys ; doesn't work yet
-  .Refresh my Keys:runapp cmd /c gpg --keyserver gpg.geekshed.net --refresh-keys
+  .Refresh my Keys:echo -a Refreshing keys from gpg.geekshed.net please wait... | runapphidden cmd /c gpg --keyserver gpg.geekshed.net --refresh-keys | echo -a All keys have been refreshed
   .Search for Keys:runapp cmd /c gpg --keyserver gpg.geekshed.net --search-keys $$?="Search Parameters (Email is best)"
   ;.Set Key Trust: ;not implemented
 }
