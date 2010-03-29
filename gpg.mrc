@@ -12,7 +12,7 @@ menu status,channel,query,nicklist,menubar {
 }
 
 on *:load:{
-  set %gpg.scriptver 0.5
+  set %gpg.scriptver 0.4
 
   if (!$isdir($scriptdir $+ gpg)) {
     runapphidden cmd /c mkdir " $+ $scriptdir $+ gpg $+ "
@@ -21,7 +21,18 @@ on *:load:{
     runapphidden cmd /c mkdir " $+ $scriptdir $+ gpg\textin $+ "
   }
 
-  set %gpg.path $$?="Enter the path to the directory in which gpg.exe resides"
+  if ($isfile(C:\Program Files\GNU\GnuPG\gpg.exe)) {
+    set %gpg.path C:\Program Files\GNU\GnuPG\
+    echo -a GPG Found At C:\Program Files\GNU\GnuPG\
+  }
+  elseif ($isfile(C:\Program Files (x86)\GNU\GnuPG\gpg.exe)) {
+    set %gpg.path C:\Program Files (x86)\GNU\GnuPG\
+    echo -a GPG Found At C:\Program Files (x86)\GNU\GnuPG\
+  }
+  else {
+    set %gpg.path $$?="I can't find GPG! Enter the path to the directory in which gpg.exe resides:"
+  }
+
   if (; $+ %gpg.path !isin $env(path)) {
     env path $env(path) $+ ; $+ %gpg.path
   }
