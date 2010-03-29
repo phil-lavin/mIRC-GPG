@@ -186,7 +186,7 @@ alias gpgDecrypt {
 alias addKeysToSPK {
   set %gpg.keyfile $scriptdir $+ gpg\keylist.txt
 
-  runapphidden cmd /c %gpg.path $+ gpg.exe --list-keys > " $+ %gpg.keyfile $+ "
+  runapphidden cmd /c gpg --list-keys > " $+ %gpg.keyfile $+ "
 
   ; Reset $readn - is there a better way?
   set %gpg.random $read(%gpg.keyfile, 1)
