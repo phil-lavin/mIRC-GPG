@@ -1,0 +1,7 @@
+Fucntion in example.dll:
+
+funcUcase : turn all case chars into upper case
+
+funcLcase : turn all case chars into lower case
+
+funcCopy : return copyright info
