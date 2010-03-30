@@ -133,6 +133,7 @@ alias gpgEncrypt {
       }
     }
 
+    set %gpg.editbox $editbox($active, 0)
     editbox -a $null
 
     set %gpg.i 1
@@ -176,6 +177,8 @@ alias gpgEncrypt {
     }
     unset %gpg.body
   }
+
+  echo -at < $+ $me [UNENC]> 4 $+ %gpg.editbox
 
   unset %gpg.halt
 
