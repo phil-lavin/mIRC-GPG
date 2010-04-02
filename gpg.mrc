@@ -373,6 +373,9 @@ on 1:TEXT:*:*:{
       if ($pos($1-,!,0) > 0) {
         write " $+ $scriptdir $+ gpg\textin\ $+ $network $+ - $+ $nick $+ .txt.gpg $+ " $replace($replace($1-,~!,$chr(10)),!,$chr(10))
       }
+      elseif ($pos($1-,~,0) > 0) {
+        write " $+ $scriptdir $+ gpg\textin\ $+ $network $+ - $+ $nick $+ .txt.gpg $+ " $replace($1-,~,$chr(10))
+      }
       elseif ($1- != ~) {
         write " $+ $scriptdir $+ gpg\textin\ $+ $network $+ - $+ $nick $+ .txt.gpg $+ " $1-
       }
