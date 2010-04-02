@@ -126,9 +126,9 @@ alias gpgEncrypt {
         }
 
         if (%gpg.body == 1) {
-          ;512 = Buffer size
+          ;510 = Buffer of 512 bytes minus \r\n
           ;Minus from that length of your host, 14 other chars and the length of the channel
-          if ($calc($len(%gpg.line) + $len(%gpg.outmsg)) >= $calc(512 - ($len($address($me, 5)) + 14 + $len($active)))) {
+          if ($calc($len(%gpg.line) + $len(%gpg.outmsg)) >= $calc(510 - ($len($address($me, 5)) + 14 + $len($active)))) {
             msg $active %gpg.outmsg
             unset %gpg.outmsg
             set %gpg.outmsg %gpg.line
