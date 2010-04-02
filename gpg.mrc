@@ -111,81 +111,86 @@ alias f8 {
 }
 
 alias gpgEncrypt {
-  $dialog(spk, selPubKey)
+  if (!$editbox($active, 0)) {
+    echo -a No Text To Send
+  }
+  else {
+    $dialog(spk, selPubKey)
 
-  if (%gpg.halt == $null) {
-    set %gpg.sourcefile $scriptdir $+ gpg\source.txt
-    set %gpg.destfile $scriptdir $+ gpg\dest.gpg
-    set %gpg.outfile $scriptdir $+ gpg\out.txt
+    if (%gpg.halt == $null) {
+      set %gpg.sourcefile $scriptdir $+ gpg\source.txt
+      set %gpg.destfile $scriptdir $+ gpg\dest.gpg
+      set %gpg.outfile $scriptdir $+ gpg\out.txt
 
-    write -c " $+ %gpg.sourcefile $+ " $editbox($active, 0)
+      write -c " $+ %gpg.sourcefile $+ " $editbox($active, 0)
 
-    runapp cmd /c gpg -e -a %gpg.recipients -o " $+ %gpg.destfile $+ " " $+ %gpg.sourcefile $+ " > " $+ %gpg.outfile $+ " 2>&1
+      runapp cmd /c gpg -e -a %gpg.recipients -o " $+ %gpg.destfile $+ " " $+ %gpg.sourcefile $+ " > " $+ %gpg.outfile $+ " 2>&1
 
-    if ($lines(%gpg.outfile) > 0) {
-      echo -at Possible error detected. GPG produced output:
+      if ($lines(%gpg.outfile) > 0) {
+        echo -at Possible error detected. GPG produced output:
+
+        set %gpg.i 1
+
+        while (%gpg.i <= $lines(%gpg.outfile)) {
+          echo -at $read(%gpg.outfile, %gpg.i)
+          inc %gpg.i
+        }
+      }
+
+      set %gpg.editbox $editbox($active, 0)
+      editbox -a $null
 
       set %gpg.i 1
 
-      while (%gpg.i <= $lines(%gpg.outfile)) {
-        echo -at $read(%gpg.outfile, %gpg.i)
-        inc %gpg.i
-      }
-    }
+      while (%gpg.i <= $lines(%gpg.destfile)) {
+        set %gpg.line $read(%gpg.destfile, %gpg.i)
 
-    set %gpg.editbox $editbox($active, 0)
-    editbox -a $null
-
-    set %gpg.i 1
-
-    while (%gpg.i <= $lines(%gpg.destfile)) {
-      set %gpg.line $read(%gpg.destfile, %gpg.i)
-
-      if ($len(%gpg.line) == 0) {
-        set %gpg.line ~
-        msg $active Comment: mirc-gpg by GeekShed.net version %gpg.scriptver http://mirc-gpg.googlecode.com
-        set %gpg.body 1
-      }
-      if (%gpg.line == -----END PGP MESSAGE-----) {
-        msg $active %gpg.outmsg
-        unset %gpg.outmsg
-        unset %gpg.body
-      }
-
-      if (%gpg.body == 1) {
-        if ($len(%gpg.outmsg) >= 385) {
+        if ($len(%gpg.line) == 0) {
+          set %gpg.line ~
+          msg $active Comment: mirc-gpg by GeekShed.net version %gpg.scriptver http://mirc-gpg.googlecode.com
+          set %gpg.body 1
+        }
+        if (%gpg.line == -----END PGP MESSAGE-----) {
           msg $active %gpg.outmsg
           unset %gpg.outmsg
-          set %gpg.outmsg %gpg.line
+          unset %gpg.body
+        }
+
+        if (%gpg.body == 1) {
+          if ($len(%gpg.outmsg) >= 385) {
+            msg $active %gpg.outmsg
+            unset %gpg.outmsg
+            set %gpg.outmsg %gpg.line
+          } 
+          elseif ($len(%gpg.outmsg) == 0) {
+            set %gpg.outmsg %gpg.line
+          }
+          else {
+            set %gpg.outmsg %gpg.outmsg $+ ! $+ %gpg.line
+          }
         } 
-        elseif ($len(%gpg.outmsg) == 0) {
-          set %gpg.outmsg %gpg.line
-        }
         else {
-          set %gpg.outmsg %gpg.outmsg $+ ! $+ %gpg.line
+          msg $active %gpg.line
         }
-      } 
-      else {
-        msg $active %gpg.line
+        inc %gpg.i
       }
-      inc %gpg.i
+
+      if ($len(%gpg.outmsg) > 0) {
+        msg $active %gpg.outmsg
+        unset %gpg.outmsg
+      }
+      unset %gpg.body
     }
 
-    if ($len(%gpg.outmsg) > 0) {
-      msg $active %gpg.outmsg
-      unset %gpg.outmsg
+    if (%gpg.editbox != $null) {
+      echo -at < $+ $me [UNENC]> 4 $+ %gpg.editbox
+      unset %gpg.editbox
     }
-    unset %gpg.body
+
+    unset %gpg.halt
+
+    runapphidden cmd /c del " $+ $scriptdir $+ gpg\*" /Q
   }
-
-  if (%gpg.editbox != $null) {
-    echo -at < $+ $me [UNENC]> 4 $+ %gpg.editbox
-    unset %gpg.editbox
-  }
-
-  unset %gpg.halt
-
-  runapphidden cmd /c del " $+ $scriptdir $+ gpg\*" /Q
 }
 
 alias gpgDecrypt {
@@ -282,23 +287,58 @@ on *:dialog:spk:sclick:*:{
       }
     }
   }
+  elseif ($did == 6) {
+    set %gpg.i 1
+
+    while (%gpg.i <= $did(1).lines) {
+      if ($did(6).state == 1) {
+        did -s spk 1 %gpg.i
+      }
+      else {
+        did -l spk 1 %gpg.i
+      }
+
+      inc %gpg.i
+    }
+  }
+  elseif ($did == 1) {
+    set %gpg.i 1
+    set %gpg.checkAll 1
+
+    while (%gpg.i <= $did(1).lines) {
+      if ($did(1, %gpg.i).cstate == 0) {
+        set %gpg.checkAll 0
+      }
+
+      inc %gpg.i
+    }
+
+    if (%gpg.checkAll == 1) {
+      did -c spk 6
+    }
+    else {
+      did -u spk 6
+    }
+  }
 }
 
 dialog selPubKey {
 
   title "Select Public Key"
 
-  size -1 -1 250 150
+  size -1 -1 250 170
 
   option dbu
 
   edit "", 4, 10 10 190 10
   button "Search", 5, 205 8 35 14, default
 
-  list 1, 10 25 230 100, multsel check result
+  check "Select/Deselect All", 6, 12 25 100 10
 
-  button "OK", 2, 65 127 50 20, ok %gpg.okbut
-  button "Cancel", 3, 125 127 50 20, cancel %gpg.cancelbut
+  list 1, 10 37 230 100, multsel check result
+
+  button "OK", 2, 65 142 50 20, ok %gpg.okbut
+  button "Cancel", 3, 125 142 50 20, cancel %gpg.cancelbut
 }
 
 alias dodel {
