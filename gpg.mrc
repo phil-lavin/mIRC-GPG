@@ -115,7 +115,6 @@ alias gpgEncrypt {
         set %gpg.line $read(%gpg.destfile, %gpg.i)
 
         if ($len(%gpg.line) == 0) {
-          set %gpg.line ~
           msg $active Comment: mirc-gpg by GeekShed.net version %gpg.scriptver http://mirc-gpg.googlecode.com
           set %gpg.body 1
         }
