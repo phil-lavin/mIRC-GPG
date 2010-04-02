@@ -2,7 +2,7 @@
 ; SVN: $Id$
 
 alias gpg.setver {
-  set %gpg.scriptver 0.7
+  set %gpg.scriptver 0.8
 }
 
 alias gpg.updatever {
