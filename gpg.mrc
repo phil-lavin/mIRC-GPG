@@ -357,10 +357,10 @@ alias dodel {
     runapphidden cmd /c del " $+ $scriptdir $+ gpg\textin\ $+ $1 $+ - $+ $2 $+ .*" /Q
     .timergpg $+ . $+ $1 $+ . $+ $2 off
   }
-  dec %gpg.incount 1
-  if (%gpg.incount <= 0) {
-    disable #gpg.capture
-  }
+  ;dec %gpg.incount 1
+  ;if (%gpg.incount <= 0) {
+  ;  disable #gpg.capture
+  ;}
 }
 
 #gpg on
@@ -369,10 +369,10 @@ on 1:TEXT:-----BEGIN PGP MESSAGE-----:*:{
   set -u10 %gpg.textin. [ $+ [ $network $+ .  [ $+ [ $nick ] ] ] ] 1
   write -c " $+ $scriptdir $+ gpg\textin\ $+ $network $+ - $+ $nick $+ .txt.gpg $+ " $1-
   .timergpg $+ . $+ $network $+ . $+ $nick 0 1 dodel $network $nick
-  if (%gpg.incount < 0) {
-    set %gpg.incount 0
-  }
-  inc %gpg.incount 1
+  ;if (%gpg.incount < 0) {
+  ;  set %gpg.incount 0
+  ;}
+  ;inc %gpg.incount 1
 }
 
 on 1:TEXT:-----END PGP MESSAGE-----:*:{
@@ -397,7 +397,7 @@ on 1:TEXT:-----END PGP MESSAGE-----:*:{
 }
 #gpg end
 
-#gpg.capture off
+;#gpg.capture off
 on 1:TEXT:*:*:{
   if ($1 != -----END PGP MESSAGE-----) {
     if (%gpg.textin. [ $+ [ $network $+ .  [ $+ [ $nick ] ] ] ] != $null) {
@@ -414,7 +414,7 @@ on 1:TEXT:*:*:{
     }
   }
 }
-#gpg.capture end
+;#gpg.capture end
 
 alias rev {
   if ($1) {
