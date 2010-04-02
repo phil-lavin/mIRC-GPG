@@ -44,7 +44,7 @@ on *:load:{
     echo -at GPG Found At C:\Program Files (x86)\GNU\GnuPG\
   }
   else {
-    set %gpg.path $$?="I can't find GPG! Enter the path to the directory in which gpg.exe resides:"
+    set %gpg.path $sdir(C:\, Please choose the directory where gpg.exe was installed to)
   }
 
   if (; $+ %gpg.path !isin $env(path)) {
