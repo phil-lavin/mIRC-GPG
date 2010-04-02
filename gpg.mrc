@@ -18,10 +18,10 @@ menu status,channel,query,nicklist,menubar {
   .Automatic Decryption
   ..$iif($group(#gpg).status == on,$style(1)) Enable:.enable #gpg
   ..$iif($group(#gpg).status == off,$style(1)) Disable:.disable #gpg
-  .Generate a new Key:runapp cmd /c gpg --gen-key
-  ;.Upload my Keys:runapp cmd /c gpg --keyserver gpg.geekshed.net --send-keys ; doesn't work yet
-  .Refresh my Keys:echo -at Refreshing keys from gpg.geekshed.net please wait... | runapphidden cmd /c gpg --keyserver gpg.geekshed.net --refresh-keys | echo -at All keys have been refreshed
-  .Search for Keys:runapp cmd /c gpg --keyserver gpg.geekshed.net --search-keys $$?="Search Parameters (Email is best)"
+  .Generate a new Key:runapp cmd /c %gpg.path $+ gpg --gen-key
+  ;.Upload my Keys:runapp cmd /c %gpg.path $+ gpg --keyserver gpg.geekshed.net --send-keys ; doesn't work yet
+  .Refresh my Keys:echo -at Refreshing keys from gpg.geekshed.net please wait... | runapphidden cmd /c %gpg.path $+ gpg --keyserver gpg.geekshed.net --refresh-keys | echo -at All keys have been refreshed
+  .Search for Keys:runapp cmd /c %gpg.path $+ gpg --keyserver gpg.geekshed.net --search-keys $$?="Search Parameters (Email is best)"
   ;.Set Key Trust: ;not implemented
 }
 
@@ -36,30 +36,20 @@ on *:load:{
   }
 
   if ($isfile(C:\Program Files\GNU\GnuPG\gpg.exe)) {
-    set %gpg.path C:\Program Files\GNU\GnuPG\
+    set %gpg.path $shortfn(C:\Program Files\GNU\GnuPG\)
     echo -at GPG Found At C:\Program Files\GNU\GnuPG\
   }
   elseif ($isfile(C:\Program Files (x86)\GNU\GnuPG\gpg.exe)) {
-    set %gpg.path C:\Program Files (x86)\GNU\GnuPG\
+    set %gpg.path $shortfn(C:\Program Files (x86)\GNU\GnuPG\)
     echo -at GPG Found At C:\Program Files (x86)\GNU\GnuPG\
   }
   else {
-    set %gpg.path $sdir(C:\, Please choose the directory where gpg.exe was installed to)
-  }
-
-  if (; $+ %gpg.path !isin $env(path)) {
-    env path $env(path) $+ ; $+ %gpg.path
+    set %gpg.path $shortfn($sdir(C:\, Please choose the directory where gpg.exe was installed to))
   }
 }
 
 on *:START:{
   gpg.setver
-
-  if (%gpg.path != $null) {
-    if (; $+ %gpg.path !isin $env(path)) {
-      env path $env(path) $+ ; $+ %gpg.path
-    }
-  }
 
   .timergpgverupdate 0 60 gpg.updatever
 }
@@ -85,27 +75,6 @@ alias runAppMin {
   .comclose %gpg.runname $com(%gpg.runname, Run, 1, *bstr, $$1-, int, 7, bool, true)
 }
 
-alias env {
-  if ($isid) {
-    var %x = $dll($scriptdir $+ menv.dll, getEnv, $1)
-    if ($gettok(%x, 1, 32) == OK) {
-      if ($prop == exists) {
-        return 1
-      }
-      return $gettok(%x, 2-, 32)
-    }
-    else {
-      if ($prop == exists) {
-        return 0
-      }
-      return $null
-    }
-  }
-  else {
-    var %x = $dll($scriptdir $+ menv.dll, putEnv, $1 $+ = $+ $2-)
-  }
-}
-
 alias f8 {
   gpgEncrypt
 }
@@ -124,7 +93,7 @@ alias gpgEncrypt {
 
       write -c " $+ %gpg.sourcefile $+ " $editbox($active, 0)
 
-      runapp cmd /c gpg -e -a %gpg.recipients -o " $+ %gpg.destfile $+ " " $+ %gpg.sourcefile $+ " > " $+ %gpg.outfile $+ " 2>&1
+      runapp cmd /c %gpg.path $+ gpg -e -a %gpg.recipients -o " $+ %gpg.destfile $+ " " $+ %gpg.sourcefile $+ " > " $+ %gpg.outfile $+ " 2>&1
 
       if ($lines(%gpg.outfile) > 0) {
         echo -at Possible error detected. GPG produced output:
@@ -194,7 +163,7 @@ alias gpgEncrypt {
 
 alias gpgDecrypt {
   set %gpg.destfile $4- $+ .unenc
-  runappmin cmd /c gpg -d -o " $+ %gpg.destfile $+ " " $+ $4- $+ " 2> " $+ $4- $+ .out $+ "
+  runappmin cmd /c %gpg.path $+ gpg -d -o " $+ %gpg.destfile $+ " " $+ $4- $+ " 2> " $+ $4- $+ .out $+ "
 
   .timergpg $+ . $+ $3 $+ . $+ $2 off
 
@@ -223,10 +192,10 @@ alias addKeysToSPK {
   set %gpg.keyfile $scriptdir $+ gpg\keylist.txt
 
   if ($1 == $null) {
-    runapphidden cmd /c gpg --list-keys > " $+ %gpg.keyfile $+ "
+    runapphidden cmd /c %gpg.path $+ gpg --list-keys > " $+ %gpg.keyfile $+ "
   }
   else {
-    runapphidden cmd /c gpg --list-keys " $+ $1- $+ " > " $+ %gpg.keyfile $+ "
+    runapphidden cmd /c %gpg.path $+ gpg --list-keys " $+ $1- $+ " > " $+ %gpg.keyfile $+ "
   }
 
   ; Reset $readn - is there a better way?
