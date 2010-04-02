@@ -266,7 +266,18 @@ on *:dialog:spk:sclick:*:{
     addkeystospk %gpg.searchstr
   }
   elseif ($did == 2) {
-    if ($did(1, 0).sel == 0) {
+    set %gpg.i 1
+    set %gpg.checkCount 0
+
+    while (%gpg.i <= $did(1).lines) {
+      if ($did(1, %gpg.i).cstate == 1) {
+        inc %gpg.checkCount
+      }
+
+      inc %gpg.i
+    }
+
+    if (%gpg.checkCount == 0) {
       echo -at No key was selected
       set %gpg.halt 1
     }
