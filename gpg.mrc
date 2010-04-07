@@ -84,6 +84,7 @@ alias gpgEncrypt {
     echo -a No Text To Send
   }
   else {
+    who $me
     $dialog(spk, selPubKey)
 
     if (%gpg.halt == $null) {
@@ -385,6 +386,11 @@ on 1:TEXT:*:*:{
   }
 }
 #gpg.capture end
+
+; Update the IAL
+on 1:NOTICE:Your vhost of *:?:{
+  who $me
+}
 
 alias rev {
   if ($1) {
